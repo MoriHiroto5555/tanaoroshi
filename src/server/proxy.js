@@ -38,8 +38,6 @@ module.exports = async function proxyHandler(req, res) {
     return res.status(500).json({ error: err.message });
   }
 
-  console.log('[proxy]', { url: `${base}${endpoint}`, appId, guestId: guestId || null });
-
 };
 
 
