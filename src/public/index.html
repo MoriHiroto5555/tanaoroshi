@@ -2,23 +2,22 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>棚卸 - サンプル</title>
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
   <h1>棚卸入力</h1>
-
   <form id="form">
     <label>JAN:
       <input id="jan" name="jan" inputmode="numeric" pattern="\d{8,13}" required>
     </label>
     <label>数量:
       <input id="qty" name="qty" type="number" min="1" required>
-    </label>
-    <!-- 追加は form の submit を使うので type="submit"、onclickは削除 -->
-    <button type="submit" id="addBtn">追加</button>
+      <button type="submit" form ="form">追加</button>
+    </label> 
   </form>
-
+  
   <table id="table">
     <thead>
       <tr><th>JAN</th><th>数量</th><th>削除</th></tr>
@@ -26,8 +25,9 @@
     <tbody></tbody>
   </table>
 
-  <!-- 送信はフォーム送信にしたくないので type="button" -->
+  <div class="actions">
   <button type="button" id="sendBtn">送信</button>
+  </div>
 
   <script src="./app.js"></script>
 </body>
