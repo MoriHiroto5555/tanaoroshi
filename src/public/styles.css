@@ -1,4 +1,4 @@
-body { font-family: Meiryo, sans-serif; padding: 16px; }
+body { font-family: Meiryo, sans-serif; padding: 8px; }
 form label { display: block; margin: 8px 0; }
 table { width: 100%; border-collapse: collapse; margin-top: 16px; }
 th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
@@ -6,3 +6,247 @@ th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
 button.delete { padding: 4px 8px; }
 
 .actions { display:flex; justify-content:flex-end; margin-top:12px; }
+
+/* フォーム全体の“枠”を強調 */
+#form {
+  border: 3px solid #999;     /* 枠を太く（数値で調整） */
+  border-radius: 12px;        /* 角丸（お好み） */
+  padding: 16px 20px;         /* 内側の余白を広く */
+  margin: 8px 0;             /* 外側の余白 */
+  background: #fff;           /* 背景（薄く色を付けてもOK） */
+  max-width: 720px;           /* 横幅をカードっぽく制限（不要なら削除） */
+}
+
+/* ラベルと入力も少し大きめに */
+#form label { display:block; margin: 12px 0; font-size: 16px; }
+#form input {
+  width: 100%;
+  max-width: 360px;           /* 入力欄の横幅（お好み） */
+  padding: 10px 12px;         /* 入力欄の高さを稼ぐ */
+  font-size: 16px;            /* モバイルでの拡大防止に16px以上推奨 */
+  box-sizing: border-box;
+}
+
+/* ベース: 押しやすいサイズと見た目 */
+.btn{
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 44px;                /* 指先で当てやすい最小幅 */
+  min-height: 44px;               /* iOSの推奨は44px, Androidは48px程度 */
+  padding: 12px 18px;             /* 触れる面積を増やす */
+  font-size: 16px; line-height: 1;/* iOSの勝手なズーム回避にも◎ */
+  border-radius: 12px;
+  border: 1px solid transparent;
+  touch-action: manipulation;     /* ダブルタップ遅延を避けるヒント */
+}
+
+/* 見た目（お好みで色は調整） */
+.btn-primary{
+  background: #0b79d0; color: #fff; border-color: #0b79d0;
+}
+.btn-primary:hover{ filter: brightness(0.97); }
+.btn-primary:active{ transform: translateY(1px); }  /* 押した感 */
+.btn:disabled{ opacity: .55; cursor: not-allowed; }
+
+/* 複数ボタンの間隔（右寄せactionsを使っている場合） */
+.actions{ display:flex; justify-content:flex-end; gap:12px; }
+
+
+/* タッチ端末ではさらに少し大きめに */
+@media (pointer: coarse){
+  .btn{ min-height: 48px; padding: 14px 20px; }
+}
+
+/* 文字と背景のコントラストは十分に（WCAG目安 4.5:1 以上を意識） */
+
+/* 下部バーの高さぶん、本文に余白を確保して隠れないようにする */
+:root { --action-bar-space: 72px; } /* ボタンの高さに合わせて微調整 */
+body {
+  padding-bottom: calc(var(--action-bar-space) + env(safe-area-inset-bottom));
+}
+
+/* 固定バー本体 */
+.action-bar {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  background: #fff;
+  border-top: 1px solid #e5e5e5;
+  box-shadow: 0 -4px 12px rgba(0,0,0,.06);
+  z-index: 1000;
+  padding: 8px 12px;
+  padding-bottom: calc(8px + env(safe-area-inset-bottom)); /* iOSノッチ対策 */
+}
+
+/* 中央寄せレイアウト＆右寄せ配置 */
+.action-bar__inner {
+  max-width: 960px;   /* ページ幅に合わせて調整 */
+  margin: 0 auto;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* 押しやすい見た目（共通ボタン） */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 44px; min-width: 44px;
+  padding: 12px 18px;
+  font-size: 16px; line-height: 1;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  touch-action: manipulation;
+}
+.btn-primary { background:#0b79d0; color:#fff; border-color:#0b79d0; }
+.btn-primary:hover { filter: brightness(0.97); }
+.btn-primary:active { transform: translateY(1px); }
+.btn:disabled { opacity:.55; cursor: not-allowed; }
+
+/* モバイルは幅いっぱいで押しやすく */
+@media (max-width: 480px){
+  .action-bar__inner { justify-content: stretch; }
+  .action-bar__inner .btn { width: 100%; min-height: 48px; }
+}
+
+/* 既に使っていれば流用。無ければ入れてOK（固定フッターがある場合に備え） */
+:root { --action-bar-space: 72px; }
+
+.numpad {
+  position: fixed; left: 0; right: 0;
+  bottom: calc(var(--action-bar-space, 0px));
+  z-index: 1100; /* 送信バー(1000)より上に */
+  transform: translateY(100%); transition: transform .18s ease-out;
+  pointer-events: none; /* 閉じてる時クリックを通す */
+}
+.numpad.is-open { transform: translateY(0); pointer-events: auto; }
+
+.numpad__sheet{
+  margin: 0 auto; max-width: 960px;
+  background: #fff; border-top: 1px solid #e5e5e5;
+  box-shadow: 0 -6px 16px rgba(0,0,0,.08);
+  padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+}
+
+.numpad__grid{
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+}
+.numpad__key{
+  min-height: 48px; font-size: 18px; border-radius: 12px;
+  border: 1px solid #ddd; background: #f7f7f7;
+}
+.numpad__key:active{ transform: translateY(1px); }
+
+.numpad__actions{
+  display:flex; justify-content:flex-end; margin-top: 8px;
+}
+.btn{
+  display:inline-flex; align-items:center; justify-content:center;
+  min-height:44px; min-width:44px; padding:12px 18px; font-size:16px;
+  border-radius:12px; border:1px solid transparent;
+}
+.btn-primary{ background:#0b79d0; color:#fff; border-color:#0b79d0; }
+.btn-primary:active{ transform: translateY(1px); }
+
+:root { 
+  --action-bar-space: 0px;     /* JSで実寸に更新される */
+  --z-action-bar: 2000;        /* 送信バーの方が常に上 */
+  --z-numpad: 1500;            /* テンキーはその下 */
+}
+
+/* 本文は送信バーに隠れないよう下余白 */
+body { 
+  padding-bottom: calc(var(--action-bar-space) + env(safe-area-inset-bottom));
+}
+
+/* 送信バー（最前面） */
+.action-bar{
+  position: fixed; left: 0; right: 0; bottom: 0;
+  z-index: var(--z-action-bar);
+}
+
+/* テンキー：送信バーの“直上”にドッキング、かつ送信バーより下のレイヤー */
+.numpad{
+  position: fixed; left: 0; right: 0;
+  bottom: var(--action-bar-space);
+  z-index: var(--z-numpad);
+  transform: translateY(100%);           /* 非表示状態 */
+  transition: transform .18s ease-out;
+  pointer-events: none;
+}
+.numpad.is-open{ 
+  transform: translateY(0); 
+  pointer-events: auto;
+}
+
+/* ==== テーブル見栄えの最小仕上げ（上書き用） ==== */
+#table{
+  /* 既存の table { border-collapse: collapse } を上書き */
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;           /* 列幅を安定 */
+  width: 100%;
+  margin-top: 16px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06);
+  overflow: hidden;              /* 角丸を効かせる */
+}
+
+#table thead th{
+  position: sticky; top: 0; z-index: 1;   /* ヘッダを固定 */
+  background: #f9fafb;
+  color: #374151;
+  font-weight: 600;
+  padding: 10px 12px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+}
+
+#table tbody td{
+  padding: 12px;
+  border-bottom: 1px solid #eef2f7;
+  vertical-align: middle;
+  line-height: 1.8;
+}
+
+/* ゼブラ & ホバー */
+#table tbody tr:nth-child(odd){ background: #fcfdff; }
+#table tbody tr:hover{ background: #f1f5ff; }
+
+/* 列ごとの整列・幅 */
+#table th:nth-child(1), #table td:nth-child(1){ /* JAN */
+  text-align: left;
+  font-variant-numeric: tabular-nums; /* 数字幅を揃える */
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+#table th:nth-child(2), #table td:nth-child(2){ /* 数量 */
+  width: 8ch;                   /* 桁数ベースで安定 */
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+#table th:nth-child(3), #table td:nth-child(3){ /* 削除 */
+  width: 5.5rem;
+  text-align: center;
+}
+
+/* 削除ボタンの見た目を統一（HTML側は <button class="delete"> を想定）*/
+#table button.delete{
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 4.5rem; height: 34px;
+  padding: 6px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #f9fafb; color: #334155;
+  cursor: pointer;
+  transition: background .15s ease, transform .05s ease;
+}
+#table button.delete:hover{ background: #eef2f7; }
+#table button.delete:active{ transform: translateY(1px); }
+
+@media (max-width: 480px){
+  #table tbody td{ padding: 10px 10px; }
+  #table button.delete{ min-width: 3.8rem; height: 40px; }
+}
+
+#table thead th{
+  text-align: center !important; /* 既存の列指定より強く上書き */
+}
