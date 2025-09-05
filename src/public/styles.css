@@ -250,3 +250,16 @@ body {
 #table thead th{
   text-align: center !important; /* 既存の列指定より強く上書き */
 }
+
+/* ページ全体でダブルタップ拡大を抑止（ピンチは可） */
+html, body {
+  touch-action: manipulation;              /* pan/pinchは許可、double-tap zoomは抑止 */
+  -webkit-tap-highlight-color: transparent;/* iOSのタップハイライトを薄く（任意） */
+}
+
+/* 連打しやすい要素も明示（念のため） */
+button, a, [role="button"], input, label,
+.numpad__key, #sendBtn, #table .delete {
+  touch-action: manipulation;
+}
+
