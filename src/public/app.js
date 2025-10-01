@@ -2,29 +2,46 @@
 
 // ---- kintone のフィールドコード（あなたの環境に合わせて変更可）----
 const TABLE_CODE = 'subtable'; // サブテーブルのフィールドコード
-const JAN_CODE   = 'jan';  // サブテーブル内: 文字列(1行)
-const QTY_CODE   = 'qty'; // サブテーブル内: 数値
+const JAN_CODE   = 'jan';      // サブテーブル内: 文字列(1行)
+const QTY_CODE   = 'qty';      // サブテーブル内: 数値
 // -------------------------------------------------------------------------
 
-const form  = document.getElementById('form');
-const tbody = document.querySelector('#table tbody');
-const janEl = document.getElementById('jan');
-const qtyEl = document.getElementById('qty');
+const form   = document.getElementById('form');
+const tbody  = document.querySelector('#table tbody');
+const janEl  = document.getElementById('jan');
+const qtyEl  = document.getElementById('qty');
 const sendBtn = document.getElementById('sendBtn');
+
+/* ---------------- 桁数制限撤廃：入力の正規化だけ行う ---------------- */
+// 全角→半角、前後空白除去
+function toHalfWidth(s = ''){
+  return s.replace(/[！-～]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0))
+          .replace(/\u3000/g, ' ')
+          .trim();
+}
+// 入力時に数字のみへ正規化（長さは見ない）
+function normalizeJanInput(){
+  const raw = toHalfWidth(janEl.value);
+  const digits = raw.replace(/\D/g, '');
+  if (digits !== janEl.value) janEl.value = digits;
+}
+janEl?.addEventListener('input', normalizeJanInput);
+/* ------------------------------------------------------------------- */
 
 // 行追加：フォーム submit（Enterでも追加できる）
 form.addEventListener('submit', (e) => {
   e.preventDefault();
 
-  const jan = janEl.value.trim();
+  // ★ 桁数チェックを撤廃。数字のみ＆1桁以上を許可
+  const jan = toHalfWidth(janEl.value).replace(/\D/g, '');
   const qty = Number(qtyEl.value);
 
   // 簡易バリデーション
-  const janOk = /^\d{8,13}$/.test(jan); // JAN: 8〜13桁数字想定
-  const qtyOk = Number.isInteger(qty) && qty > 0;
+  const janOk = /^\d+$/.test(jan);                  // ← 長さは不問（1桁以上の数字）
+  const qtyOk = Number.isInteger(qty) && qty > 0;   // 数量は1以上の整数
 
   if (!janOk || !qtyOk) {
-    alert('JANは8〜13桁の数字、数量は1以上の整数で入力してください。');
+    alert('JANは数字のみ（桁数は自由）、数量は1以上の整数で入力してください。');
     return;
   }
 
@@ -45,7 +62,7 @@ form.addEventListener('submit', (e) => {
   tdDel.appendChild(btnDel);
 
   tr.append(tdJan, tdQty, tdDel);
-  tbody.prepend(tr); 
+  tbody.prepend(tr);
 
   // 入力欄クリア & フォーカス戻し
   janEl.value = '';
@@ -85,9 +102,7 @@ sendBtn.addEventListener('click', async () => {
     // app はサーバ側(proxy)で .env の KINTONE_APP_ID を使って補完する想定
     record: {
       [TABLE_CODE]: { value: tableRows }
-      // 親レコード側に他の項目を保存したい場合はここに追記:
-      // 例) "実施日": { value: "2025-08-25" },
-      //     "担当者": { value: "山田太郎" }
+      // 親レコードに他の項目を保存したい場合はここに追記
     }
   };
 
